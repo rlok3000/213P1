@@ -306,7 +306,6 @@ public class SongLibController {
 		String newSongYear = selectedSongYear.getText();
 		String oldSongName = songLibraryWrapper.get(editSongKey).getSongName();
 		String oldSongArtist = songLibraryWrapper.get(editSongKey).getSongArtist();
-		LinkedList<Song> songLibraryCopy = songLibrary;
 		if(newSongName.isEmpty() || newSongArtist.isEmpty()) {
 			missingInputAlert.showAndWait();
 			return;
@@ -324,8 +323,18 @@ public class SongLibController {
 			return;
 		}
 		else {
-			songLibraryWrapper.remove(editSongKey);
+			ListIterator<Song> duplicateIter = songLibraryWrapper.listIterator();
+			while(duplicateIter.hasNext()) {
+				Song currentSong = duplicateIter.next();
+				int songNameCompareVal = newSongName.compareToIgnoreCase(currentSong.getSongName());
+				int songArtistCompareVal = newSongArtist.compareToIgnoreCase(currentSong.getSongArtist());
+				if(songNameCompareVal == 0 && songArtistCompareVal == 0) {
+					duplicateAlert.showAndWait();
+					return;
+				}
+			}
 		}
+		songLibraryWrapper.remove(editSongKey);
 		Song newSongData = new Song(newSongName, newSongArtist, newSongAlbum, newSongYear);
 		ListIterator<Song> iter = songLibraryWrapper.listIterator();
 		int selectionIndex = 0;
@@ -341,11 +350,6 @@ public class SongLibController {
 				getSongDetails();
 				disableSongDetails();
 				saveSongs();
-				return;
-			}
-			else if(songNameCompareVal == 0 && songArtistCompareVal == 0) {
-				songLibrary = songLibraryCopy;
-				duplicateAlert.showAndWait();
 				return;
 			}
 			selectionIndex++;
