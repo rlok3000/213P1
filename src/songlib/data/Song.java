@@ -1,3 +1,8 @@
+/*
+ * Som Kovacs
+ * Russell Lok 
+ */
+
 package songlib.data;
 
 import java.io.Serializable;

@@ -1,3 +1,8 @@
+/*
+ * Som Kovacs
+ * Russell Lok 
+ */
+
 package songlib.app;
 	
 import javafx.application.Application;
@@ -10,9 +15,9 @@ public class SongLib extends Application {
 	@Override
 	public void start(Stage primaryStage) {
 		try {
-			BorderPane root = (BorderPane)FXMLLoader.load(getClass().getResource("SongLib.fxml"));
+			BorderPane root = (BorderPane)FXMLLoader.load(getClass().getResource("/songlib/resources/SongLib.fxml"));
 			Scene scene = new Scene(root,750,500);
-			scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
+			scene.getStylesheets().add(getClass().getResource("/songlib/resources/application.css").toExternalForm());
 			primaryStage.setTitle("Song Library");
 			primaryStage.setScene(scene);
 			primaryStage.show();

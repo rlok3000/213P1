@@ -41,7 +41,7 @@
 				<Button text="Submit Song" style="-fx-padding: 5" onAction="#addSong"/>
 			</VBox>
 			<VBox fx:id="songDetails" visible="false">
-				<Label text="Song Details:" style="-fx-font-size: 20; -fx-padding: 10"></Label>
+				<Label text="Song Details (Click on field below to edit):" style="-fx-font-size: 20; -fx-padding: 10"></Label>
 				<Label text="Song Name:" style="-fx-padding:5"></Label>
 				<TextField fx:id="selectedSongName" editable="false" focusTraversable="false" onMouseClicked="#enableField" onAction="#editSong"/>
 				<Label text="Artist Name:" style="-fx-padding:5"></Label>

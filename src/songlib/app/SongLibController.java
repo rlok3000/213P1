@@ -1,3 +1,8 @@
+/*
+ * Som Kovacs
+ * Russell Lok 
+ */
+
 package songlib.app;
 
 import songlib.data.Song;
@@ -57,7 +62,7 @@ public class SongLibController {
 	protected ObservableList<Song> songLibraryWrapper;
 
 	public SongLibController() throws FileNotFoundException, IOException, ClassNotFoundException {
-		savedSongs = new SavedSongsHandler("src/songlib/app/songlib_data.txt");
+		savedSongs = new SavedSongsHandler("src/songlib/resources/songlib_data.txt");
 		songLibrary = savedSongs.readSongs();
 		duplicateAlert = new Alert(Alert.AlertType.ERROR, "The song you want to add is a duplicate!", ButtonType.CLOSE);
 		missingInputAlert = new Alert(Alert.AlertType.ERROR, "The song cannot be added without a valid song name and artist name!", ButtonType.CLOSE);
@@ -91,18 +96,26 @@ public class SongLibController {
 			}
 		});
 		addSongToolBarButton.setSelected(true);
-		Platform.runLater(new Runnable() {
-			@Override
-			public void run() {
-				addNewSongName.requestFocus();
-			}
-		});
+		if(songLibrary.isEmpty()) {
+			Platform.runLater(new Runnable() {
+				@Override
+				public void run() {
+					addNewSongName.requestFocus();
+				}
+			});
+		}
+		else {
+			songListView.getSelectionModel().clearAndSelect(0);
+			songListView.fireEvent(songListViewMouseEvent);
+		}
 	}
 
 	@FXML
 	protected void addSong(ActionEvent event) throws IOException {
 		addSongAlert.showAndWait();
-		
+		if(addSongAlert.getResult().equals(ButtonType.CANCEL))
+			return;
+
 		String newSongName = addNewSongName.getText();
 		String newSongArtist = addNewSongArtist.getText();
 		String newSongAlbum = addNewSongAlbum.getText();
@@ -207,7 +220,7 @@ public class SongLibController {
 		selectedSongYear.setEditable(false);
 		editSongBtn.setDisable(true);
 	}
-	
+
 	protected void clearSongDetails() {
 		selectedSongName.clear();
 		selectedSongArtist.clear();
@@ -218,7 +231,9 @@ public class SongLibController {
 	@FXML
 	protected void editSong() throws IOException {
 		editSongAlert.showAndWait();
-		
+		if(editSongAlert.getResult().equals(ButtonType.CANCEL))
+			return;
+
 		String newSongName = selectedSongName.getText();
 		String newSongArtist = selectedSongArtist.getText();
 		String newSongAlbum = selectedSongAlbum.getText();
@@ -279,11 +294,24 @@ public class SongLibController {
 		saveSongs();
 		return;
 	}
-	
+
 	@FXML
 	protected void deleteSong(ActionEvent event) throws IOException {
-		deleteSongAlert.showAndWait();
-		
+		if(songListView.getSelectionModel().isEmpty()) {
+			deleteSongAlert.setContentText("No songs exist/are selected");
+			deleteSongAlert.showAndWait();
+			if(deleteSongAlert.getResult().equals(ButtonType.CANCEL)) {
+				return;
+			}
+		}
+		else {
+			deleteSongAlert.setContentText("Delete selected song?");
+			deleteSongAlert.showAndWait();
+			if(deleteSongAlert.getResult().equals(ButtonType.CANCEL)) {
+				return;
+			}
+		}
+
 		int selectedIndex = songListView.getSelectionModel().getSelectedIndex();
 		if(selectedIndex >= 0) {
 			int newSelectedIndex = 0;
@@ -319,7 +347,7 @@ public class SongLibController {
 			}
 		}
 	}
-	
+
 	@FXML
 	protected void saveSongs() throws IOException {
 		savedSongs.writeSongs(songLibrary);
