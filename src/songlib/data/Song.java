@@ -1,12 +1,13 @@
-/*
- * Som Kovacs
- * Russell Lok 
- */
-
 package songlib.data;
 
 import java.io.Serializable;
 
+/**
+ * 
+ * @author Russell Lok
+ * @author Sam Kovacs
+ *
+ */
 public class Song implements Serializable {
 	
 	protected String name;
@@ -14,6 +15,11 @@ public class Song implements Serializable {
 	protected String album;
 	protected String year;
 	
+	/**
+	 * Creates Song using input name and artist
+	 * @param name
+	 * @param artist
+	 */
 	public Song(String name, String artist) {
 		this.name = name;
 		this.artist = artist;
@@ -21,6 +27,13 @@ public class Song implements Serializable {
 		this.year = null;
 	}
 	
+	/**
+	 * Creates Song using input name, artist, album, and year
+	 * @param name
+	 * @param artist
+	 * @param album
+	 * @param year
+	 */
 	public Song(String name, String artist, String album, String year) {
 		this.name = name;
 		this.artist = artist;
@@ -28,11 +41,20 @@ public class Song implements Serializable {
 		this.year = year;
 	}
 	
+	/**
+	 * Replaces respective Song variables with input name, artist, album, and year.
+	 * Basically performs all set methods in Song class
+	 * @param name
+	 * @param artist
+	 * @param album
+	 * @param year
+	 */
 	public void editSong(String name, String artist, String album, String year) {
 		this.name = name;
 		this.artist = artist;
 		this.album = album;
 		this.year = year;
+		return;
 	}
 	
 	public String getSongName() {
