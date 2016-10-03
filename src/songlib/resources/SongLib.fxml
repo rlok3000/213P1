@@ -30,7 +30,7 @@
 		<StackPane>
 			<VBox fx:id="addSongForm" visible="true">
 				<Label text="Add Song Form:" style="-fx-font-size: 20; -fx-padding: 10"></Label>
-				<Label text="Song Name:" style="-fx-padding:5; -fx-"></Label>
+				<Label text="Song Name:" style="-fx-padding:5;"></Label>
 				<TextField fx:id="addNewSongName" onAction="#addSong"></TextField>
 				<Label text="Artist Name:" style="-fx-padding:5"></Label>
 				<TextField fx:id="addNewSongArtist" onAction="#addSong"></TextField>
