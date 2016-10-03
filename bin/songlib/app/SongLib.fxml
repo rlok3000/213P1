@@ -20,6 +20,7 @@
 				onAction="#showAddSongForm"></ToggleButton>
 			<Button fx:id="deleteSongToolBarButton" text="Delete selected song"
 				onAction="#deleteSong" style="-fx-background-color: rgb(217,83,79)"></Button>
+			<!-- <Button text="Save song library" onAction="#saveSongs" style="-fx-background-color: rgb(92,184,92)"></Button>-->
 		</ToolBar>
 	</top>
 	<left>

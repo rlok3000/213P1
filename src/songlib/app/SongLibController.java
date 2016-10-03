@@ -1,7 +1,10 @@
 package songlib.app;
 
 import songlib.data.Song;
+import songlib.data.SavedSongsHandler;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.ListIterator;
 
@@ -23,12 +26,16 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.ListCell;
 
 public class SongLibController {
-	protected LinkedList<Song> songLibrary;
+	public LinkedList<Song> songLibrary;
 	protected Alert duplicateAlert;
 	protected Alert missingInputAlert;
 	protected Alert successAlert;
+	protected Alert addSongAlert;
+	protected Alert editSongAlert;
+	protected Alert deleteSongAlert;
 	protected MouseEvent songListViewMouseEvent;
 	protected int editSongKey;
+	protected SavedSongsHandler savedSongs;
 
 	@FXML TextField addNewSongName;
 	@FXML TextField addNewSongArtist;
@@ -49,16 +56,20 @@ public class SongLibController {
 
 	protected ObservableList<Song> songLibraryWrapper;
 
-	public SongLibController() {
-		songLibrary = new LinkedList<Song>();
+	public SongLibController() throws FileNotFoundException, IOException, ClassNotFoundException {
+		savedSongs = new SavedSongsHandler("src/songlib/app/songlib_data.txt");
+		songLibrary = savedSongs.readSongs();
 		duplicateAlert = new Alert(Alert.AlertType.ERROR, "The song you want to add is a duplicate!", ButtonType.CLOSE);
 		missingInputAlert = new Alert(Alert.AlertType.ERROR, "The song cannot be added without a valid song name and artist name!", ButtonType.CLOSE);
 		successAlert = new Alert(Alert.AlertType.INFORMATION, "Changes successful!", ButtonType.OK);
+		addSongAlert = new Alert(Alert.AlertType.CONFIRMATION, "Add song to library?");
+		editSongAlert = new Alert(Alert.AlertType.CONFIRMATION, "Save changes to selected song?");
+		deleteSongAlert = new Alert(Alert.AlertType.CONFIRMATION, "Delete selected song?");
 		songListViewMouseEvent = new MouseEvent(MouseEvent.MOUSE_CLICKED, 0, 0, 0, 0, MouseButton.PRIMARY, 1, true, true, true, true, true, true, true, true, true, true, null);
 	}
 
 	@FXML
-	public void initialize() {
+	public void initialize() throws FileNotFoundException, IOException, ClassNotFoundException {
 		songLibraryWrapper = FXCollections.observableList(songLibrary);
 		songListView.setItems(songLibraryWrapper);
 		songListView.setCellFactory(new Callback<ListView<Song>, ListCell<Song>>(){
@@ -89,14 +100,16 @@ public class SongLibController {
 	}
 
 	@FXML
-	protected void addSong(ActionEvent event) {
+	protected void addSong(ActionEvent event) throws IOException {
+		addSongAlert.showAndWait();
+		
 		String newSongName = addNewSongName.getText();
 		String newSongArtist = addNewSongArtist.getText();
 		String newSongAlbum = addNewSongAlbum.getText();
 		String newSongYear = addNewSongYear.getText();
 
 		if(newSongName.isEmpty() || newSongArtist.isEmpty()) {
-			missingInputAlert.show();
+			missingInputAlert.showAndWait();
 			return;
 		}
 		Song newSongData = new Song(newSongName, newSongArtist, newSongAlbum, newSongYear);
@@ -113,10 +126,11 @@ public class SongLibController {
 				songListView.refresh();
 				songListView.fireEvent(songListViewMouseEvent);
 				clearAddSongForm();
+				saveSongs();
 				return;
 			}
 			else if(songNameCompareVal == 0 && songArtistCompareVal == 0) {
-				duplicateAlert.show();
+				duplicateAlert.showAndWait();
 				return;
 			}
 			selectionIndex++;
@@ -126,6 +140,7 @@ public class SongLibController {
 		songListView.refresh();
 		songListView.fireEvent(songListViewMouseEvent);
 		clearAddSongForm();
+		saveSongs();
 		return;
 	}
 
@@ -163,12 +178,12 @@ public class SongLibController {
 
 	protected void getSongDetails() {
 		int selectedSongIndex = songListView.getSelectionModel().getSelectedIndex();
-		Song songData = songLibrary.get(selectedSongIndex);//songLibrary.get(selectedSongNameKey);
+		Song songData = songLibrary.get(selectedSongIndex);
 		selectedSongName.setText(songData.getSongName());
 		selectedSongArtist.setText(songData.getSongArtist());
 		selectedSongAlbum.setText(songData.getSongAlbum());
 		selectedSongYear.setText(songData.getSongYear());
-		editSongKey = selectedSongIndex;//selectedSongNameKey;
+		editSongKey = selectedSongIndex;
 		return;
 	}
 
@@ -201,7 +216,9 @@ public class SongLibController {
 	}
 
 	@FXML
-	protected void editSong() {
+	protected void editSong() throws IOException {
+		editSongAlert.showAndWait();
+		
 		String newSongName = selectedSongName.getText();
 		String newSongArtist = selectedSongArtist.getText();
 		String newSongAlbum = selectedSongAlbum.getText();
@@ -210,7 +227,7 @@ public class SongLibController {
 		String oldSongArtist = songLibraryWrapper.get(editSongKey).getSongArtist();
 		LinkedList<Song> songLibraryCopy = songLibrary;
 		if(newSongName.isEmpty() || newSongArtist.isEmpty()) {
-			missingInputAlert.show();
+			missingInputAlert.showAndWait();
 			return;
 		}
 		else if(oldSongName.equalsIgnoreCase(newSongName) && oldSongArtist.equalsIgnoreCase(newSongArtist)) {
@@ -222,6 +239,7 @@ public class SongLibController {
 			songListView.refresh();
 			getSongDetails();
 			disableSongDetails();
+			saveSongs();
 			return;
 		}
 		else {
@@ -241,11 +259,12 @@ public class SongLibController {
 				songListView.refresh();
 				getSongDetails();
 				disableSongDetails();
+				saveSongs();
 				return;
 			}
 			else if(songNameCompareVal == 0 && songArtistCompareVal == 0) {
 				songLibrary = songLibraryCopy;
-				duplicateAlert.show();
+				duplicateAlert.showAndWait();
 				return;
 			}
 			selectionIndex++;
@@ -257,11 +276,14 @@ public class SongLibController {
 		songListView.refresh();
 		getSongDetails();
 		disableSongDetails();
+		saveSongs();
 		return;
 	}
 	
 	@FXML
-	protected void deleteSong(ActionEvent event) {
+	protected void deleteSong(ActionEvent event) throws IOException {
+		deleteSongAlert.showAndWait();
+		
 		int selectedIndex = songListView.getSelectionModel().getSelectedIndex();
 		if(selectedIndex >= 0) {
 			int newSelectedIndex = 0;
@@ -272,6 +294,7 @@ public class SongLibController {
 				clearSongDetails();
 				showAddSongForm();
 				addSongToolBarButton.setSelected(true);
+				saveSongs();
 				return;
 			}
 			else if(selectedIndex+1 < songLibrary.size()) {
@@ -281,6 +304,7 @@ public class SongLibController {
 				songListView.refresh();
 				getSongDetails();
 				disableSongDetails();
+				saveSongs();
 				return;
 			}
 			else {
@@ -290,8 +314,14 @@ public class SongLibController {
 				songListView.refresh();
 				getSongDetails();
 				disableSongDetails();
+				saveSongs();
 				return;
 			}
 		}
+	}
+	
+	@FXML
+	protected void saveSongs() throws IOException {
+		savedSongs.writeSongs(songLibrary);
 	}
 }
